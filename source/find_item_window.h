@@ -38,6 +38,8 @@ public:
 		Names,
 		Types,
 		Properties,
+		Stack,
+		Stairs
 	};
 
 	enum SearchItemType {
@@ -57,12 +59,14 @@ public:
 
 	Brush* getResult() const { return result_brush; }
 	uint16_t getResultID() const { return result_id; }
+	uint16_t getFloorID() const { return floor_id; }
 
 	SearchMode getSearchMode() const;
 	void setSearchMode(SearchMode mode);
 
 private:
 	void EnableProperties(bool enable);
+	void EnableStack(bool enable);
 	void RefreshContentsInternal();
 
 	void OnOptionChange(wxCommandEvent& event);
@@ -78,13 +82,17 @@ private:
 	wxRadioBox* options_radio_box;
 
 	wxRadioBox* types_radio_box;
+	wxSpinCtrl* stack_min_spin;
+	wxSpinCtrl* stack_max_spin;
 
 	wxSpinCtrl* server_id_spin;
 	wxSpinCtrl* client_id_spin;
 	wxTextCtrl* name_text_input;
 	wxTimer input_timer;
+	wxCheckBox* allinmap;
 	wxCheckBox* unpassable;
 	wxCheckBox* unmovable;
+	wxCheckBox* movable;
 	wxCheckBox* block_missiles;
 	wxCheckBox* block_pathfinder;
 	wxCheckBox* readable;
@@ -99,6 +107,9 @@ private:
 	wxCheckBox* ignore_look;
 	wxCheckBox* floor_change;
 
+	wxChoice* floor_choice;
+	wxChoice* stairs_choice;
+
 	FindDialogListBox* items_list;
 	wxStdDialogButtonSizer* buttons_box_sizer;
 	wxButton* ok_button;
@@ -106,6 +117,7 @@ private:
 	Brush* result_brush;
 	uint16_t result_id;
 	bool only_pickupables;
+	int floor_id;
 
 	DECLARE_EVENT_TABLE()
 };

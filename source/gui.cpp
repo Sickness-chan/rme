@@ -104,18 +104,18 @@ GUI::~GUI()
 wxGLContext* GUI::GetGLContext(wxGLCanvas* win)
 {
 	if(OGLContext == nullptr) {
-#ifdef __WXOSX__
-        /*
-        wxGLContext(AGLPixelFormat fmt, wxGLCanvas *win,
-                    const wxPalette& WXUNUSED(palette),
-                    const wxGLContext *other
-                    );
-        */
+	#ifdef __WXOSX__
+		/*
+		wxGLContext(AGLPixelFormat fmt, wxGLCanvas *win,
+		const wxPalette& WXUNUSED(palette),
+		const wxGLContext *other
+		);
+		*/
 		OGLContext = new wxGLContext(win, nullptr);
-#else
+	#else
 		OGLContext = newd wxGLContext(win);
-#endif
-    }
+	#endif
+	}
 
 	return OGLContext;
 }
@@ -173,11 +173,11 @@ wxString GUI::GetLocalDataDirectory()
 		return dir.GetPath(wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR);;
 	} else {
 		FileName dir = dynamic_cast<wxStandardPaths&>(wxStandardPaths::Get()).GetUserDataDir();
-#ifdef __WINDOWS__
+	#ifdef __WINDOWS__
 		dir.AppendDir("Remere's Map Editor");
-#else
+	#else
 		dir.AppendDir(".rme");
-#endif
+	#endif
 		dir.AppendDir("data");
 		dir.Mkdir(0755, wxPATH_MKDIR_FULL);
 		return dir.GetPath(wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR);
@@ -193,11 +193,11 @@ wxString GUI::GetLocalDirectory()
 		return dir.GetPath(wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR);;
 	} else {
 		FileName dir = dynamic_cast<wxStandardPaths&>(wxStandardPaths::Get()).GetUserDataDir();
-#ifdef __WINDOWS__
+	#ifdef __WINDOWS__
 		dir.AppendDir("Remere's Map Editor");
-#else
+	#else
 		dir.AppendDir(".rme");
-#endif
+	#endif
 		dir.Mkdir(0755, wxPATH_MKDIR_FULL);
 		return dir.GetPath(wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR);
 	}
@@ -517,7 +517,7 @@ void GUI::FitViewToMap(MapTab* mt)
 
 bool GUI::NewMap()
 {
-    FinishWelcomeDialog();
+	FinishWelcomeDialog();
 
 	Editor* editor;
 	try
@@ -532,7 +532,7 @@ bool GUI::NewMap()
 
 	auto *mapTab = newd MapTab(tabbook, editor);
 	mapTab->OnSwitchEditorMode(mode);
-    editor->map.clearChanges();
+	editor->map.clearChanges();
 
 	SetStatusText("Created new map");
 	UpdateTitle();
@@ -586,7 +586,7 @@ void GUI::SaveMapAs()
 
 bool GUI::LoadMap(const FileName& fileName)
 {
-    FinishWelcomeDialog();
+	FinishWelcomeDialog();
 
 	if(GetCurrentEditor() && !GetCurrentMap().hasChanged() && !GetCurrentMap().hasFile())
 		g_gui.CloseCurrentEditor();
@@ -1182,40 +1182,40 @@ void GUI::DestroyLoadBar()
 }
 
 void GUI::ShowWelcomeDialog(const wxBitmap &icon) {
-    std::vector<wxString> recent_files = root->GetRecentFiles();
-    welcomeDialog = newd WelcomeDialog(__W_RME_APPLICATION_NAME__, "Version " + __W_RME_VERSION__, root->FromDIP(wxSize(800, 480)), icon, recent_files);
-    welcomeDialog->Bind(wxEVT_CLOSE_WINDOW, &GUI::OnWelcomeDialogClosed, this);
-    welcomeDialog->Bind(WELCOME_DIALOG_ACTION, &GUI::OnWelcomeDialogAction, this);
-    welcomeDialog->Show();
-    UpdateMenubar();
+	std::vector<wxString> recent_files = root->GetRecentFiles();
+	welcomeDialog = newd WelcomeDialog(__W_RME_APPLICATION_NAME__, "Version " + __W_RME_VERSION__, root->FromDIP(wxSize(800, 480)), icon, recent_files);
+	welcomeDialog->Bind(wxEVT_CLOSE_WINDOW, &GUI::OnWelcomeDialogClosed, this);
+	welcomeDialog->Bind(WELCOME_DIALOG_ACTION, &GUI::OnWelcomeDialogAction, this);
+	welcomeDialog->Show();
+	UpdateMenubar();
 }
 
 void GUI::FinishWelcomeDialog() {
-    if (welcomeDialog != nullptr) {
-        welcomeDialog->Hide();
+	if (welcomeDialog != nullptr) {
+		welcomeDialog->Hide();
 		root->Show();
-        welcomeDialog->Destroy();
-        welcomeDialog = nullptr;
-    }
+		welcomeDialog->Destroy();
+		welcomeDialog = nullptr;
+	}
 }
 
 bool GUI::IsWelcomeDialogShown() {
-    return welcomeDialog != nullptr && welcomeDialog->IsShown();
+	return welcomeDialog != nullptr && welcomeDialog->IsShown();
 }
 
 void GUI::OnWelcomeDialogClosed(wxCloseEvent &event)
 {
-    welcomeDialog->Destroy();
-    root->Close();
+	welcomeDialog->Destroy();
+	root->Close();
 }
 
 void GUI::OnWelcomeDialogAction(wxCommandEvent &event)
 {
-    if (event.GetId() == wxID_NEW) {
-        NewMap();
-    } else if (event.GetId() == wxID_OPEN) {
-        LoadMap(FileName(event.GetString()));
-    }
+	if (event.GetId() == wxID_NEW) {
+		NewMap();
+	} else if (event.GetId() == wxID_OPEN) {
+		LoadMap(FileName(event.GetString()));
+	}
 }
 
 void GUI::UpdateMenubar()
@@ -1840,7 +1840,7 @@ void GUI::FillDoodadPreviewBuffer()
 		}
 	} else {
 		if(brush->hasCompositeObjects(GetBrushVariation()) &&
-				random(brush->getTotalChance(GetBrushVariation())) <= brush->getCompositeChance(GetBrushVariation())) {
+			random(brush->getTotalChance(GetBrushVariation())) <= brush->getCompositeChance(GetBrushVariation())) {
 			// Composite
 			const CompositeTileList& composites = brush->getComposite(GetBrushVariation());
 
@@ -2008,7 +2008,7 @@ std::ostream& operator<<(std::ostream& os, const Hotkey& hotkey)
 		} break;
 		case Hotkey::BRUSH: {
 			if(hotkey.brushname.find('{') != std::string::npos ||
-					hotkey.brushname.find('}') != std::string::npos) {
+				hotkey.brushname.find('}') != std::string::npos) {
 				break;
 			}
 			os << "brush:{" << hotkey.brushname << "}";

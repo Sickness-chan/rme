@@ -878,7 +878,7 @@ bool ItemDatabase::loadItemFromGameXml(pugi::xml_node itemNode, int id)
 		} else if(key == "floorchange") {
 			if ((attribute = itemAttributesNode.attribute("value"))) {
 				std::string value = attribute.as_string();
-				if(value == "down") {
+				if (value == "down") {
 					it.floorChangeDown = true;
 					it.floorChange = true;
 				} else if (value == "north") {
@@ -893,18 +893,22 @@ bool ItemDatabase::loadItemFromGameXml(pugi::xml_node itemNode, int id)
 				} else if (value == "east") {
 					it.floorChangeEast = true;
 					it.floorChange = true;
-				} else if(value == "northex")
+				} else if (value == "northex")
 					it.floorChange = true;
-				else if(value == "southex")
+				else if (value == "southex")
 					it.floorChange = true;
-				else if(value == "westex")
+				else if (value == "westex")
 					it.floorChange = true;
-				else if(value == "eastex")
+				else if (value == "eastex")
 					it.floorChange = true;
 				else if (value == "southalt")
 					it.floorChange = true;
 				else if (value == "eastalt")
 					it.floorChange = true;
+
+				if (it.floorChange) {
+					it.floorChangeStr = value;
+				}
 			}
 		}
 	}

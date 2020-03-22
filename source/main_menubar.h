@@ -52,6 +52,7 @@ namespace MenuBar
 		SEARCH_ON_SELECTION_EVERYTHING,
 		SEARCH_ON_SELECTION_UNIQUE,
 		SEARCH_ON_SELECTION_ACTION,
+		SEARCH_ON_SELECTION_ALL,
 		SEARCH_ON_SELECTION_CONTAINER,
 		SEARCH_ON_SELECTION_WRITEABLE,
 		SEARCH_ON_SELECTION_ITEM,
@@ -68,6 +69,7 @@ namespace MenuBar
 		RANDOMIZE_MAP,
 		GOTO_PREVIOUS_POSITION,
 		GOTO_POSITION,
+		UPGRADE_MAP,
 		JUMP_TO_BRUSH,
 		JUMP_TO_ITEM_BRUSH,
 		CLEAR_INVALID_HOUSES,
@@ -75,6 +77,9 @@ namespace MenuBar
 		CUT,
 		COPY,
 		PASTE,
+		COPYID,
+		SETPOS,
+
 		EDIT_TOWNS,
 		EDIT_ITEMS,
 		EDIT_MONSTERS,
@@ -205,6 +210,7 @@ public:
 	void OnJumpToItemBrush(wxCommandEvent& event);
 	void OnGotoPreviousPosition(wxCommandEvent& event);
 	void OnGotoPosition(wxCommandEvent& event);
+	void OnUpgradeMap(wxCommandEvent& event);
 	void OnMapRemoveItems(wxCommandEvent& event);
 	void OnMapRemoveCorpses(wxCommandEvent& event);
 	void OnMapRemoveUnreachable(wxCommandEvent& event);
@@ -215,6 +221,8 @@ public:
 	void OnCut(wxCommandEvent& event);
 	void OnCopy(wxCommandEvent& event);
 	void OnPaste(wxCommandEvent& event);
+	void OnCopyId(wxCommandEvent& event);
+	void OnSetPos(wxCommandEvent& event);
 	void OnSearchForItem(wxCommandEvent& event);
 	void OnReplaceItem(wxCommandEvent& event);
 	void OnSearchForStuffOnMap(wxCommandEvent& event);
@@ -227,6 +235,7 @@ public:
 	void OnSearchForStuffOnSelection(wxCommandEvent& event);
 	void OnSearchForUniqueOnSelection(wxCommandEvent& event);
 	void OnSearchForActionOnSelection(wxCommandEvent& event);
+	void OnSearchForAllOnSelection(wxCommandEvent& event);
 	void OnSearchForContainerOnSelection(wxCommandEvent& event);
 	void OnSearchForWriteableOnSelection(wxCommandEvent& event);
 	void OnSearchForItemOnSelection(wxCommandEvent& event);
@@ -282,7 +291,7 @@ protected:
 	wxObject* LoadItem(pugi::xml_node node, wxMenu* parent, wxArrayString& warnings, wxString& error);
 	// Checks the items in the menus according to the settings (in config)
 	void LoadValues();
-	void SearchItems(bool unique, bool action, bool container, bool writable, bool onSelection = false);
+	void SearchItems(bool unique, bool action, bool container, bool writable, bool onSelection = false, bool all = false);
 protected:
 
 	MainFrame* frame;
