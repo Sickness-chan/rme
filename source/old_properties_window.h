@@ -40,6 +40,8 @@ public:
 
 	void Update();
 
+	void OnChar(wxKeyEvent& evt);
+
 protected:
 
 protected:

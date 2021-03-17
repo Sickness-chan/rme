@@ -26,6 +26,7 @@
 #include <string>
 
 #include "mt_rand.h"
+#include "position.h"
 
 //
 inline bool testFlags(size_t flags, size_t test) {
@@ -71,7 +72,7 @@ std::wstring string2wstring(const std::string& utf8string);
 std::string wstring2string(const std::wstring& widestring);
 
 // Gets position values from ClipBoard
-bool posFromClipboard(int& x, int& y, int& z);
+bool posFromClipboard(Position& position, const int mapWidth = MAP_MAX_WIDTH, const int mapHeight = MAP_MAX_HEIGHT);
 
 // Returns 'yes' if the defined value is true or 'no' if it is false.
 wxString b2yn(bool v);

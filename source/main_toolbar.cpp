@@ -518,12 +518,14 @@ void MainToolBar::OnPositionKeyUp(wxKeyEvent& event)
 void MainToolBar::OnPastePositionText(wxClipboardTextEvent& event)
 {
 	Position position;
-	if (posFromClipboard(position.x, position.y, position.z)) {
+	const Editor* const editor = g_gui.GetCurrentEditor();
+	if (posFromClipboard(position, editor->getMapWidth(), editor->getMapHeight())) {
 		x_control->SetIntValue(position.x);
 		y_control->SetIntValue(position.y);
 		z_control->SetIntValue(position.z);
-	} else
+	} else {
 		event.Skip();
+	}
 }
 
 void MainToolBar::OnSizesButtonClick(wxCommandEvent& event)
