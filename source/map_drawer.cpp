@@ -1319,36 +1319,57 @@ void MapDrawer::BlitCreature(int screenx, int screeny, const Creature* c, int re
 
 void MapDrawer::WriteTooltip(Item* item, std::ostringstream& stream)
 {
-	if(item == nullptr)
+	if (item == nullptr) {
 		return;
+	}
 
 	const uint16_t id = item->getID();
-	if(id < 100)
+	if (id < 100) {
 		return;
+	}
 
 	const uint16_t unique = item->getUniqueID();
 	const uint16_t action = item->getActionID();
 	const std::string& text = item->getText();
-	if(unique == 0 && action == 0 && text.empty())
-		return;
+	const Teleport* const teleport = dynamic_cast<Teleport*>(item);
 
-	if(stream.tellp() > 0)
+	if ((unique == 0) && (action == 0) && text.empty() && !teleport) {
+		return;
+	}
+
+	if (teleport && !teleport->hasDestination() && (unique == 0) && (action == 0)) {
+		return;
+	}
+
+	if (stream.tellp() > 0) {
 		stream << "\n";
+	}
 
 	stream << "id: " << id << "\n";
 
-	if (action > 0)
+	if (action > 0) {
 		stream << "aid: " << action << "\n";
-	if(unique > 0)
+	}
+
+	if (unique > 0) {
 		stream << "uid: " << unique << "\n";
-	if(!text.empty())
+	}
+
+	if (!text.empty()) {
 		stream << "text: " << text << "\n";
+	}
+
+	if (teleport && teleport->hasDestination()) {
+		stream << "dest: " << teleport->getX() << ", " << teleport->getY() << ", " << teleport->getZ() << "\n";
+	}
 }
 
 void MapDrawer::WriteTooltip(Waypoint* waypoint, std::ostringstream& stream)
 {
-	if (stream.tellp() > 0)
+	if (stream.tellp() > 0) {
 		stream << "\n";
+	}
+
 	stream << "wp: " << waypoint->name << "\n";
 }
 
