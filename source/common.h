@@ -77,6 +77,9 @@ bool posFromClipboard(Position& position, const int mapWidth = MAP_MAX_WIDTH, co
 // Returns 'yes' if the defined value is true or 'no' if it is false.
 wxString b2yn(bool v);
 
+// Builds the clipboard string in the configured format when copying a position
+void buildPositionFormat(std::ostringstream& stream, Position& pos);
+
 // Standard math functions
 template <class T>
 inline T abs(T t) {

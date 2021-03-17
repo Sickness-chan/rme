@@ -19,6 +19,7 @@
 
 #include "common.h"
 #include "math.h"
+#include "settings.h"
 
 #include <sstream>
 #include <random>
@@ -250,4 +251,24 @@ wxString b2yn(bool v)
 		s << "no";
 
 	return s;
+}
+
+void buildPositionFormat(std::ostringstream& stream, Position& pos) {
+	switch (g_settings.getInteger(Config::COPY_POSITION_FORMAT)) {
+		case 0:
+			stream << "{x = " << pos.x << ", y = " << pos.y << ", z = " << pos.z << "}";
+			break;
+		case 1:
+			stream << "{\"x\":" << pos.x << ",\"y\":" << pos.y << ",\"z\":" << pos.z << "}";
+			break;
+		case 2:
+			stream << pos.x << ", " << pos.y << ", " << pos.z;
+			break;
+		case 3:
+			stream << "(" << pos.x << ", " << pos.y << ", " << pos.z << ")";
+			break;
+		case 4:
+			stream << "Position(" << pos.x << ", " << pos.y << ", " << pos.z << ")";
+			break;
+	}
 }

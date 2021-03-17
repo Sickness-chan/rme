@@ -74,17 +74,18 @@ BEGIN_EVENT_TABLE(MapCanvas, wxGLCanvas)
 	EVT_MENU(MAP_POPUP_MENU_CUT, MapCanvas::OnCut)
 	EVT_MENU(MAP_POPUP_MENU_COPY, MapCanvas::OnCopy)
 	EVT_MENU(MAP_POPUP_MENU_COPY_POSITION, MapCanvas::OnCopyPosition)
-	EVT_MENU(MAP_POPUP_MENU_SET_POSITION, MapCanvas::OnSetPos)
-	EVT_MENU(MAP_POPUP_MENU_COPY_ID, MapCanvas::OnCopyId)
 	EVT_MENU(MAP_POPUP_MENU_PASTE, MapCanvas::OnPaste)
 	EVT_MENU(MAP_POPUP_MENU_DELETE, MapCanvas::OnDelete)
 	//----
 	EVT_MENU(MAP_POPUP_MENU_COPY_SERVER_ID, MapCanvas::OnCopyServerId)
 	EVT_MENU(MAP_POPUP_MENU_COPY_CLIENT_ID, MapCanvas::OnCopyClientId)
 	EVT_MENU(MAP_POPUP_MENU_COPY_NAME, MapCanvas::OnCopyName)
+	EVT_MENU(MAP_POPUP_MENU_COPY_ACTION_ID, MapCanvas::OnCopyActionId)
+	EVT_MENU(MAP_POPUP_MENU_COPY_UNIQUE_ID, MapCanvas::OnCopyUniqueId)
 	// ----
-	EVT_MENU(MAP_POPUP_MENU_ROTATE, MapCanvas::OnRotateItem)
 	EVT_MENU(MAP_POPUP_MENU_GOTO, MapCanvas::OnGotoDestination)
+	EVT_MENU(MAP_POPUP_MENU_COPY_DESTINATION, MapCanvas::OnCopyDestination)
+	EVT_MENU(MAP_POPUP_MENU_ROTATE, MapCanvas::OnRotateItem)
 	EVT_MENU(MAP_POPUP_MENU_SWITCH_DOOR, MapCanvas::OnSwitchDoor)
 	// ----
 	EVT_MENU(MAP_POPUP_MENU_SELECT_RAW_BRUSH, MapCanvas::OnSelectRAWBrush)
@@ -1817,36 +1818,17 @@ void MapCanvas::OnCopyPosition(wxCommandEvent& WXUNUSED(event))
 
 	std::ostringstream clip;
 	if(minPos != maxPos) {
-		clip << "{";
-		clip << "fromx = " << minPos.x << ", ";
-		clip << "tox = " << maxPos.x << ", ";
-		clip << "fromy = " << minPos.y << ", ";
-		clip << "toy = " << maxPos.y << ", ";
-		if(minPos.z != maxPos.z) {
-			clip << "fromz = " << minPos.z << ", ";
-			clip << "toz = " << maxPos.z;
-		}
-		else
-			clip << "z = " << minPos.z;
+		clip << "{\n";
+		clip << "\ttl = {x = " << minPos.x << ", ";
+		clip << "y = " << minPos.y << ", ";
+		clip << "z = " << minPos.z << "},";
+		clip << "\n\tbr = {x = " << maxPos.x << ", ";
+		clip << "y = " << maxPos.y << ", ";
+		clip << "z = " << maxPos.z << "}";
+		clip << "\n";
 		clip << "}";
 	} else {
-		switch (g_settings.getInteger(Config::COPY_POSITION_FORMAT)) {
-			case 0:
-				clip << "{x = " << minPos.x << ", y = " << minPos.y << ", z = " << minPos.z << "}";
-				break;
-			case 1:
-				clip << "{\"x\":" << minPos.x << ",\"y\":" << minPos.y << ",\"z\":" << minPos.z << "}";
-				break;
-			case 2:
-				clip << minPos.x << ", " << minPos.y << ", " << minPos.z;
-				break;
-			case 3:
-				clip << "(" << minPos.x << ", " << minPos.y << ", " << minPos.z << ")";
-				break;
-			case 4:
-				clip << "Position(" << minPos.x << ", " << minPos.y << ", " << minPos.z << ")";
-				break;
-		}
+		buildPositionFormat(clip, Position(minPos.x, minPos.y, minPos.z));
 	}
 
 	if(wxTheClipboard->Open()) {
@@ -1915,6 +1897,36 @@ void MapCanvas::OnCopyName(wxCommandEvent& WXUNUSED(event))
 	}
 }
 
+void MapCanvas::OnCopyActionId(wxCommandEvent& WXUNUSED(event))
+{
+	ASSERT(editor.selection.size() == 1);
+	if (wxTheClipboard->Open()) {
+		Tile* tile = editor.selection.getSelectedTile();
+		ItemVector selected_items = tile->getSelectedItems();
+		ASSERT(selected_items.size() == 1);
+		const Item* item = selected_items.front();
+		wxTextDataObject* obj = new wxTextDataObject();
+		obj->SetText(i2ws(item->getActionID()));
+		wxTheClipboard->SetData(obj);
+		wxTheClipboard->Close();
+	}
+}
+
+void MapCanvas::OnCopyUniqueId(wxCommandEvent& WXUNUSED(event))
+{
+	ASSERT(editor.selection.size() == 1);
+	if (wxTheClipboard->Open()) {
+		Tile* tile = editor.selection.getSelectedTile();
+		ItemVector selected_items = tile->getSelectedItems();
+		ASSERT(selected_items.size() == 1);
+		const Item* item = selected_items.front();
+		wxTextDataObject* obj = new wxTextDataObject();
+		obj->SetText(i2ws(item->getUniqueID()));
+		wxTheClipboard->SetData(obj);
+		wxTheClipboard->Close();
+	}
+}
+
 void MapCanvas::OnBrowseTile(wxCommandEvent& WXUNUSED(event))
 {
 	if(editor.selection.size() != 1)
@@ -1938,32 +1950,6 @@ void MapCanvas::OnBrowseTile(wxCommandEvent& WXUNUSED(event))
 	}
 
 	w->Destroy();
-}
-
-void MapCanvas::OnCopyId(wxCommandEvent& WXUNUSED(event))
-{
-	Tile* tile = editor.selection.getSelectedTile();
-
-	Item* item = tile->getTopSelectedItem();
-	std::ostringstream clip;
-	clip << item->getID() ;
-	wxTextDataObject* obj = new wxTextDataObject();
-	obj->SetText(wxstr(clip.str()));
-	wxTheClipboard->SetData(obj);
-}
-
-void MapCanvas::OnSetPos(wxCommandEvent& WXUNUSED(event))
-{
-	Tile* tile = editor.selection.getSelectedTile();
-	ItemVector selected_items = tile->getSelectedItems();
-	ASSERT(selected_items.size() > 0);
-	Teleport* teleport = dynamic_cast<Teleport*>(selected_items.front());
-	if(teleport)
-	{
-		Position minPos = editor.selection.minPosition();
-		minPos = Position(minPos.x, minPos.y, minPos.z);
-		teleport->setDestination(minPos);
-	}
 }
 
 void MapCanvas::OnRotateItem(wxCommandEvent& WXUNUSED(event))
@@ -1994,6 +1980,25 @@ void MapCanvas::OnGotoDestination(wxCommandEvent& WXUNUSED(event))
 	if(teleport) {
 		Position pos = teleport->getDestination();
 		g_gui.SetScreenCenterPosition(pos);
+	}
+}
+
+void MapCanvas::OnCopyDestination(wxCommandEvent& WXUNUSED(event))
+{
+	Tile* tile = editor.selection.getSelectedTile();
+	ItemVector selected_items = tile->getSelectedItems();
+	ASSERT(selected_items.size() > 0);
+	Teleport* teleport = dynamic_cast<Teleport*>(selected_items.front());
+	if(teleport) {
+		std::ostringstream clip;
+		buildPositionFormat(clip, teleport->getDestination());
+
+		if(wxTheClipboard->Open()) {
+			wxTextDataObject* obj = new wxTextDataObject();
+			obj->SetText(wxstr(clip.str()));
+			wxTheClipboard->SetData(obj);
+			wxTheClipboard->Close();
+		}
 	}
 }
 
@@ -2283,12 +2288,6 @@ void MapPopupMenu::Update()
 	wxMenuItem* copyPositionItem = Append( MAP_POPUP_MENU_COPY_POSITION, "&Copy Position", "Copy the position as a lua table");
 	copyPositionItem->Enable(anything_selected);
 
-	wxMenuItem* setPosition = Append( MAP_POPUP_MENU_SET_POSITION, wxT("&Set Position"), wxT("Set the position to this tile"));
-	setPosition->Enable(anything_selected);
-
-	wxMenuItem* copyItemId = Append( MAP_POPUP_MENU_COPY_ID, wxT("&Copy Id"), wxT("Copy the Item Id"));
-	copyItemId->Enable(anything_selected);
-
 	wxMenuItem* pasteItem = Append( MAP_POPUP_MENU_PASTE, "&Paste\tCTRL+V", "Paste items in the copybuffer here");
 	pasteItem->Enable(editor.copybuffer.canPaste());
 
@@ -2335,26 +2334,47 @@ void MapPopupMenu::Update()
 				Append(MAP_POPUP_MENU_COPY_SERVER_ID, "Copy Item Server Id", "Copy the server id of this item");
 				Append(MAP_POPUP_MENU_COPY_CLIENT_ID, "Copy Item Client Id", "Copy the client id of this item");
 				Append(MAP_POPUP_MENU_COPY_NAME, "Copy Item Name", "Copy the name of this item");
+
+				if (topSelectedItem->getActionID()) {
+					Append(MAP_POPUP_MENU_COPY_ACTION_ID, "Copy Item Action Id", "Copy the action id of this item");
+				}
+
+				if (topSelectedItem->getUniqueID()) {
+					Append(MAP_POPUP_MENU_COPY_UNIQUE_ID, "Copy Item Unique Id", "Copy the unique id of this item");
+				}
+
 				AppendSeparator();
 			}
 
 			if(topSelectedItem || topCreature || topItem) {
-				Teleport* teleport = dynamic_cast<Teleport*>(topSelectedItem);
-				if(topSelectedItem && (topSelectedItem->isBrushDoor() || topSelectedItem->isRoteable() || teleport)) {
+				if(topSelectedItem) {
+					const Teleport* const teleport = dynamic_cast<Teleport*>(topSelectedItem);
+					const bool isDoor = topSelectedItem->isBrushDoor();
+					const bool isRotatable = topSelectedItem->isRoteable();
+					bool appendSeperator = false;
 
-					if(topSelectedItem->isRoteable()) 
-						Append(MAP_POPUP_MENU_ROTATE, "&Rotate item", "Rotate this item");
+					if(isRotatable) {
+						Append( MAP_POPUP_MENU_ROTATE, "&Rotate item", "Rotate this item");
+						appendSeperator = true;
+					}
 
-					if(teleport && teleport->hasDestination()) 
-						Append(MAP_POPUP_MENU_GOTO, "&Go To Destination", "Go to the destination of this teleport");
+					if(teleport && teleport->hasDestination()) {
+						Append( MAP_POPUP_MENU_GOTO, "&Go To Destination", "Go to the destination of this teleport");
+						Append( MAP_POPUP_MENU_COPY_DESTINATION, "Copy Destination", "Copy the destination of this teleport");
+						appendSeperator = true;
+					}
 
-					if(topSelectedItem->isDoor())
-					{
-						if (topSelectedItem->isOpen()) {
-							Append(MAP_POPUP_MENU_SWITCH_DOOR, "&Close door", "Close this door");
+					if(isDoor) {
+						if(topSelectedItem->isOpen()) {
+							Append( MAP_POPUP_MENU_SWITCH_DOOR, "&Close door", "Close this door");
 						} else {
-							Append(MAP_POPUP_MENU_SWITCH_DOOR, "&Open door", "Open this door");
+							Append( MAP_POPUP_MENU_SWITCH_DOOR, "&Open door", "Open this door");
 						}
+
+						appendSeperator = true;
+					}
+
+					if (appendSeperator) {
 						AppendSeparator();
 					}
 				}
